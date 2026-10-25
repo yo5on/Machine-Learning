@@ -1,4 +1,4 @@
-"""Cluster the local Iris CSV, visualize PCA, and compare with true species."""
+"""Run K-Means and PCA on Iris, compare clusters with species, and save results."""
 
 import csv
 from pathlib import Path
@@ -9,11 +9,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from joblib import dump, load
-from sklearn.cluster import KMeans
-from sklearn.datasets import load_iris
-from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results"
@@ -22,6 +17,8 @@ DATASET = ROOT / "Iris.csv"
 
 def load_iris_data():
     if not DATASET.exists():
+        from sklearn.datasets import load_iris
+
         iris = load_iris()
         return iris.data, iris.target, iris.target_names
 
@@ -57,23 +54,64 @@ def load_iris_data():
     return features, true_species, species_names
 
 
+def assign_clusters(data, centers):
+    distances = ((data[:, None, :] - centers[None, :, :]) ** 2).sum(axis=2)
+    labels = distances.argmin(axis=1)
+    return labels, distances[np.arange(len(data)), labels].sum()
+
+
+def fit_kmeans(data, k, seed=42, n_init=10):
+    best_centers, best_labels, best_inertia = None, None, float("inf")
+    for restart in range(n_init):
+        rng = np.random.default_rng(seed + restart)
+        centers = [data[rng.integers(len(data))]]
+        for _ in range(1, k):
+            nearest = ((data[:, None, :] - np.array(centers)[None, :, :]) ** 2).sum(axis=2).min(axis=1)
+            centers.append(data[rng.choice(len(data), p=nearest / nearest.sum())])
+        centers = np.array(centers)
+
+        for _ in range(300):
+            labels, _ = assign_clusters(data, centers)
+            updated = np.array(
+                [data[labels == i].mean(axis=0) if np.any(labels == i) else centers[i]
+                 for i in range(k)]
+            )
+            if np.allclose(centers, updated):
+                centers = updated
+                break
+            centers = updated
+
+        labels, inertia = assign_clusters(data, centers)
+        if inertia < best_inertia:
+            best_centers, best_labels, best_inertia = centers, labels, inertia
+    return best_centers, best_labels, best_inertia
+
+
+def predict(data, saved_model):
+    standardized = (data - saved_model["mean"]) / saved_model["scale"]
+    return assign_clusters(standardized, saved_model["centers"])[0]
+
+
 def main():
     features, true_species, species_names = load_iris_data()
 
     # Scaling gives each of Iris's four measurements comparable influence.
-    model = make_pipeline(
-        StandardScaler(), KMeans(n_clusters=3, random_state=42, n_init=10)
-    )
-    clusters = model.fit_predict(features)
+    feature_mean = features.mean(axis=0)
+    feature_scale = features.std(axis=0)
+    feature_scale[feature_scale == 0] = 1
+    standardized = (features - feature_mean) / feature_scale
+    centers, clusters, _ = fit_kmeans(standardized, k=3)
     assert len(np.unique(clusters)) == 3
 
-    standardized = model.named_steps["standardscaler"].transform(features)
-    pca = PCA(n_components=2)
-    reduced = pca.fit_transform(standardized)
+    # PCA uses the two eigenvectors with the largest covariance eigenvalues.
+    covariance = np.cov(standardized, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(covariance)
+    order = np.argsort(eigenvalues)[::-1]
+    ratios = eigenvalues[order] / eigenvalues.sum()
+    reduced = standardized @ eigenvectors[:, order[:2]]
     assert reduced.shape == (len(features), 2)
-    ratios = pca.explained_variance_ratio_
-    print(f"PCA explained variance ratio: {ratios}")
-    print(f"PCA cumulative explained variance: {ratios.sum():.4f}")
+    print(f"PCA explained variance ratio: {ratios[:2]}")
+    print(f"PCA cumulative explained variance: {ratios[:2].sum():.4f}")
     print("PCA compresses the four scaled measurements into two informative axes for plotting.")
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -113,10 +151,7 @@ def main():
     print("Cluster IDs are arbitrary and do not directly match species labels.")
 
     k_values = range(1, 11)
-    inertias = [
-        KMeans(n_clusters=k, random_state=42, n_init=10).fit(standardized).inertia_
-        for k in k_values
-    ]
+    inertias = [fit_kmeans(standardized, k)[2] for k in k_values]
     fig, axis = plt.subplots(figsize=(7, 5))
     axis.plot(list(k_values), inertias, marker="o")
     axis.set_xticks(list(k_values))
@@ -129,9 +164,10 @@ def main():
     plt.close(fig)
 
     model_path = OUTPUT / "iris_kmeans.joblib"
-    dump(model, model_path)
+    saved_model = {"mean": feature_mean, "scale": feature_scale, "centers": centers}
+    dump(saved_model, model_path)
     reloaded = load(model_path)
-    assert np.array_equal(clusters, reloaded.predict(features))
+    assert np.array_equal(clusters, predict(features, reloaded))
     print(f"Saved and reloaded model; predictions match: {model_path}")
     print(f"Plots saved in: {OUTPUT}")
 
