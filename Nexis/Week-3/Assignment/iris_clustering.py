@@ -1,5 +1,6 @@
-"""Cluster Iris flowers, visualize PCA, and compare clusters with true species."""
+"""Cluster the local Iris CSV, visualize PCA, and compare with true species."""
 
+import csv
 from pathlib import Path
 
 import matplotlib
@@ -16,13 +17,48 @@ from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results"
+DATASET = ROOT / "Iris.csv"
+
+
+def load_iris_data():
+    if not DATASET.exists():
+        iris = load_iris()
+        return iris.data, iris.target, iris.target_names
+
+    with DATASET.open(newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+        if not reader.fieldnames:
+            raise ValueError(f"Iris CSV has no header: {DATASET}")
+        species_column = next(
+            (name for name in reader.fieldnames if name.casefold() == "species"), None
+        )
+        feature_columns = [
+            name for name in reader.fieldnames
+            if name.casefold() not in {"id", "species"}
+        ]
+        if species_column is None or len(feature_columns) < 2:
+            raise ValueError("Iris.csv needs a Species column and at least two measurements.")
+        rows = list(reader)
+
+    labels = [row[species_column].strip() for row in rows]
+    species_names = np.array(sorted(set(labels)))
+    if not rows or len(species_names) != 3:
+        raise ValueError("Iris.csv must contain rows for exactly three species.")
+    try:
+        features = np.array(
+            [[float(row[name]) for name in feature_columns] for row in rows]
+        )
+    except (TypeError, ValueError) as error:
+        raise ValueError("Iris.csv measurement columns must contain numeric values.") from error
+    if not np.isfinite(features).all():
+        raise ValueError("Iris.csv measurements cannot be missing or infinite.")
+    species_ids = {name: index for index, name in enumerate(species_names)}
+    true_species = np.array([species_ids[label] for label in labels])
+    return features, true_species, species_names
 
 
 def main():
-    iris = load_iris()
-    features = iris.data
-    true_species = iris.target
-    species_names = iris.target_names
+    features, true_species, species_names = load_iris_data()
 
     # Scaling gives each of Iris's four measurements comparable influence.
     model = make_pipeline(
