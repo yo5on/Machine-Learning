@@ -1,0 +1,101 @@
+{
+  "rows": 920,
+  "columns_count": 16,
+  "columns": [
+    "id",
+    "age",
+    "sex",
+    "dataset",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalch",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal",
+    "num"
+  ],
+  "dtypes": {
+    "id": "int64",
+    "age": "int64",
+    "sex": "str",
+    "dataset": "str",
+    "cp": "str",
+    "trestbps": "float64",
+    "chol": "float64",
+    "fbs": "object",
+    "restecg": "str",
+    "thalch": "float64",
+    "exang": "object",
+    "oldpeak": "float64",
+    "slope": "str",
+    "ca": "float64",
+    "thal": "str",
+    "num": "int64"
+  },
+  "missing_values": {
+    "id": 0,
+    "age": 0,
+    "sex": 0,
+    "dataset": 0,
+    "cp": 0,
+    "trestbps": 59,
+    "chol": 30,
+    "fbs": 90,
+    "restecg": 2,
+    "thalch": 55,
+    "exang": 55,
+    "oldpeak": 62,
+    "slope": 309,
+    "ca": 611,
+    "thal": 486,
+    "num": 0
+  },
+  "raw_num_distribution": {
+    "0": 411,
+    "1": 265,
+    "2": 109,
+    "3": 107,
+    "4": 28
+  },
+  "class_distribution": {
+    "no disease (0)": 411,
+    "disease (1)": 509
+  },
+  "features_used": [
+    "age",
+    "sex",
+    "cp",
+    "trestbps",
+    "chol",
+    "fbs",
+    "restecg",
+    "thalch",
+    "exang",
+    "oldpeak",
+    "slope",
+    "ca",
+    "thal"
+  ],
+  "categorical_features": [
+    "sex",
+    "cp",
+    "fbs",
+    "restecg",
+    "exang",
+    "slope",
+    "thal"
+  ],
+  "numeric_features": [
+    "age",
+    "trestbps",
+    "chol",
+    "thalch",
+    "oldpeak",
+    "ca"
+  ]
+}
