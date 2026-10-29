@@ -78,6 +78,12 @@ Machine-Learning/
 
 There is currently no shared Python environment file or project-wide test suite. Install dependencies for the exercises you intend to run.
 
-<h2 align="center"><samp><b>Author</b></samp></h2>
+<div align="center">
 
-**Yoson** · [GitHub](https://github.com/yo5on)
+---
+
+<samp><strong>Yoson</strong> · software, AI/ML and programming practice</samp>
+
+<samp><a href="https://github.com/yo5on">github.com/yo5on</a> · <a href="https://www.linkedin.com/in/yo5on">LinkedIn</a></samp>
+
+</div>
