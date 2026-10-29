@@ -13,7 +13,7 @@
 
 <h2 align="center"><samp><b>Collections</b></samp></h2>
 
-<h4 align="center"><samp><b>Beeskilled</b></samp></h4>
+<h3 align="center"><samp><b>Beeskilled</b></samp></h3>
 
 <samp>C programming assignments organised by week.</samp>
 
@@ -30,7 +30,7 @@ gcc qn1.c -o qn1
 
 <samp>On Windows, run the compiled program as `qn1.exe`.</samp>
 
-<h4 align="center"><samp><b>Nexis</b></samp></h4>
+<h3 align="center"><samp><b>Nexis</b></samp></h3>
 
 <samp>Python practice and introductory data analysis.</samp>
 
