@@ -1,8 +1,17 @@
-# Machine Learning & Programming Practice
+<div align="center">
 
-A collection of coursework and practice exercises organised by source and week. This repository is a folder of learning materials, not one packaged application.
+<samp><b>YO5ON · MACHINE LEARNING & PROGRAMMING</b></samp>
 
-## Collections
+<samp>c · python · pandas · scikit-learn · data analysis</samp>
+
+</div>
+
+---
+
+<div align="center"><samp>A practical collection of coursework and programming exercises, organised by source and week. This repository contains learning materials rather than one packaged application.</samp></div>
+
+
+<h2 align="center"><samp><b>Collections</b></samp></h2>
 
 ### Beeskilled
 
@@ -51,7 +60,7 @@ cd Nexis/Week-1/Assignment
 python titanic_cleaning.py
 ```
 
-## Repository Layout
+<h2 align="center"><samp><b>Repository Layout</b></samp></h2>
 
 ```text
 Machine-Learning/
@@ -69,6 +78,6 @@ Machine-Learning/
 
 There is currently no shared Python environment file or project-wide test suite. Install dependencies for the exercises you intend to run.
 
-## Author
+<h2 align="center"><samp><b>Author</b></samp></h2>
 
 **Yoson** · [GitHub](https://github.com/yo5on)
